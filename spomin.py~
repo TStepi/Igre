@@ -51,7 +51,6 @@ def igra(k,n,strat,prvi):
         print(odkriti)
         print(neodkriti)
         print(najdeni)
-        print(predprejsnja,prejsnjaNicNovih)
         print()
         
     return najdeni
