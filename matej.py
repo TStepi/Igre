@@ -106,7 +106,7 @@ def taktikaMatej(znani, neznani, upanja, stJaz, stOn, aliStSt, spomincek):
         #sv/sv
         p1 = p(m, k)
         q1 = 1 - p1
-        p2 = 1 / (k  - 1)
+        p2 = Fraction(1, k - 1)
         q2 = 1 - p2
         eSvSv = p1 * (1 + upanja[m - 1][k - 1][0]) + q1 * (p2 * (1 + upanja[m][k - 2][0]) + q2 * ((k + m)//2 - upanja[m + 2][k - 2][0]))
     if k >= 1 and m >= 1:
@@ -254,18 +254,22 @@ def igra(k,n, str1, str2, upan = None):
     neodkriti = set(range(2*n))
     igralec = 0
     prejsnjaNicNovih = False
-
+    predprej = False
     najdeni = [0, 0]
 ##    print("Začenjam igro.")
 ##    print("položaj:\n", spomin)
 ##    izpisi(upan)
-    while len(odkriti) + len(neodkriti) > 0:
+    while sum(najdeni) < n and (not prejsnjaNicNovih or not predprej):
 ##        print()
 ##        print("Na potezi je igralec", igralec)
 ##        print("odkriti:", odkriti)
 ##        print("skriti:", neodkriti)
+        predprej = prejsnjaNicNovih
+        
         f = strat[igralec]
+##        print(f.__name__)
         (i,j) = f(odkriti, neodkriti, upan, najdeni[igralec], najdeni[1 - igralec], prejsnjaNicNovih, spomin)
+        prejsnjaNicNovih = False
 ##        print("Izbral je:", i, j)
         odkriti[spomin[i]].add(i)
         odkriti[spomin[j]].add(j)
@@ -273,15 +277,12 @@ def igra(k,n, str1, str2, upan = None):
 ##            print("Našel je par! ")
             najdeni[igralec] += 1
             del odkriti[spomin[i]]
-            prejsnjaNicNovih = False
         else:
 ##            print("Zgrešil je! ")
             igralec = 1 - igralec
             #če smo izbrali stare in nismo dobili para:
             if not (i in neodkriti or j in neodkriti):
                 prejsnjaNicNovih = True
-            else:
-                prejsnjaNicNovih = False
         neodkriti -= {i,j}
     return najdeni
 
@@ -290,10 +291,13 @@ def test(ponovi, n, str1, str2):
     up = upanja(n)
     for i in range(ponovi):
         if i%100 == 0:print(i)
-        x = igra(2, n, str1, str2, up)
-        if x[0] > x[1]:
+        if i%2 == 0:
+            x = igra(2, n, str1, str2, up)
+        else:
+            x = igra(2, n, str2, str1, up)
+        if x[i%2] > x[1-i%2]:
             a[0] += 1
-        elif x[0] < x[1]:
+        elif x[i%2] < x[1-i%2]:
             a[1] += 1
         else:
             a[2] += 1
