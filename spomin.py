@@ -1,8 +1,9 @@
 from random import *
+from matej import taktikaMatej
+
 
 n = 10
 k = 2
-
 
 
 
@@ -34,10 +35,10 @@ def igra(k,n):
     spomin = k*list(range(n))
     shuffle(spomin)
     odkriti = {i:set() for i in range(n)}
+    neodkriti = set(range(2*n))
     preostali = set(range(2*n))
     igralec = 0
-    prva = None
-    druga = None
+    prejsnjaNicNovih = False
 
     najdeni = [0, 0]
 
@@ -46,9 +47,11 @@ def igra(k,n):
         (i,j) = f()
         odkriti[spomin[i]].add(i)
         odkriti[spomin[j]].add(j)
+        neodkriti -= {i,j}
         if spomin[i] == spomin[j]:
             najdeni[igralec] += 1
             preostali -= {i,j}
+            odkriti[spomin[i]] = set()
         else:
             igralec = 1 - igralec
 
