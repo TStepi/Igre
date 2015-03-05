@@ -36,13 +36,16 @@ def upanja(stParov):
                 mat[m][k] = potezaSv[::]
     return mat
 
-def taktikaMatej(znani, neznani, upanja, stJaz, stOn):
+def taktikaMatej(znani, neznani, upanja, stJaz, stOn, aliStSt):
+    prazniKand = [None, None]
     m = 0
     unijaZn = []
     for st in znani:
         m += len(znani[st])
         if len(znani[st]) == 2:#če kdaj k != 2: TU PORRAVI ...
             return tuple(znani[st])
+        elif len(znani[st]) > 0:
+            prazniKand[int(prazniKand[0] != None)] = list(znani[st])[0]
     #znanih sami različini
     k = len(neznani)
     if m == 0:#"prva poteza"
@@ -50,9 +53,14 @@ def taktikaMatej(znani, neznani, upanja, stJaz, stOn):
         i = int(k * random())
         j = int((k - 1) * random())
         if j >= i: j +=1
-        return (i,j)
+        return (lst[i],lst[j])
     else:
-        
+        if aliStSt:
+            if stJaz > stOn:
+                if m >= 2:
+                    return (prazniKand[0], prazniKand[1])
+                else:
+                    #nadaljuj
 
 
 
