@@ -1,49 +1,41 @@
 from random import *
-from matej import taktikaMatej
-
+#from matej import taktikaMatej
+from tomaz import taktikaTomaz
 
 n = 10
 k = 2
 
+def nakljucna(spomin, odkriti, neodkriti, mojipari, tvojipari, bednapoteza):
+    mozni = {x for x in neodkriti}
+    for x in odkriti.values():
+        mozni |= x
+    print(mozni)
+    i = choice(list(mozni))
+    j = choice(list(mozni-{i}))
+    return (i,j)
 
 
+#dvoboj = [taktikaMatej, taktikaTomaz]
+testT = [nakljucna, nakljucna]
 
-def igra(k,n):
-    
-    def strategija1():
-        pogledani = set()
-        izbira = ()
-        for p in odkriti:
-            pogledani |= odkriti[p]
-            if len(odkriti[p]) == k:
-                izbira = tuple(odkriti[p])
-        if izbira != ():
-            return izbira
-        i = choice(list(preostali-pogledani))
-        prva = spomin[i]
-        if len(odkriti[prva]) == k-1:
-            return tuple([i]+list(odkriti[prva]))
-        
-            
 
-    def strategija2():
-        i = choice(list(preostali))
-        j = choice(list(preostali-{i}))
-        return (i,j)
-    
-    strat = [strategija1,strategija2]
+def igra(k,n,strat,prvi):
     spomin = k*list(range(n))
     shuffle(spomin)
+    print(spomin)
+    print()
     odkriti = {i:set() for i in range(n)}
-    neodkriti = set(range(2*n))
-    igralec = 0
+    neodkriti = set(range(k*n))
+    igralec = prvi
     prejsnjaNicNovih = False
+    predprejsnja = False
 
     najdeni = [0, 0]
 
-    while preostali:
-        f = strat[igralec]
-        (i,j) = f()
+    while sum(najdeni) < n and (not predprejsnja or not prejsnjaNicNovih):
+        (i,j) = strat[igralec](spomin,odkriti,neodkriti,najdeni[igralec],najdeni[igralec-1],prejsnjaNicNovih)
+        predprejsnja = prejsnjaNicNovih
+        prejsnjaNicNovih = False
         odkriti[spomin[i]].add(i)
         odkriti[spomin[j]].add(j)
         if spomin[i] == spomin[j]:
@@ -55,6 +47,13 @@ def igra(k,n):
             if not (i in neodkriti or j in neodkriti):
                 prejsnjaNicNovih = True
         neodkriti -= {i,j}
+        print(i,j)
+        print(odkriti)
+        print(neodkriti)
+        print(najdeni)
+        print(predprejsnja,prejsnjaNicNovih)
+        print()
+        
     return najdeni
         
     
