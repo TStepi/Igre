@@ -2,12 +2,19 @@ from random import choice
 
 def taktikaTomaz(spomin, odkriti, neodkriti, mojipari, tvojipari, safety):
     #print("Tomaž")
+    
     pogledani = set()
     izbira = ()
     for p in odkriti:
         pogledani |= odkriti[p]
         if len(odkriti[p]) == 2:
             izbira = tuple(odkriti[p])
+            
+    if mojipari > tvojipari and safety:
+        i = choice(list(pogledani))
+        j = choice(list(pogledani-{i}))
+        return (i,j)
+           
     if izbira != ():
         return izbira
         

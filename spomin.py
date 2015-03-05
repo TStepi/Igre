@@ -1,5 +1,5 @@
 from random import *
-#from matej import taktikaMatej
+from matej import taktikaMatej
 from tomaz import taktikaTomaz
 
 n = 10
