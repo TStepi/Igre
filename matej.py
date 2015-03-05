@@ -1,3 +1,31 @@
+from random import *
+def nasprotnik(znani, neznani, upanja, stJaz, stOn, aliStSt, spomincek):
+    epsi = 10**-10
+    prazniKand = [None, None]
+    m = 0
+    for st in znani:
+        m += len(znani[st])
+        if len(znani[st]) == 2:#če kdaj k != 2: TU PORRAVI ...
+            return tuple(znani[st])
+        elif len(znani[st]) > 0:
+            prazniKand[int(prazniKand[0] != None)] = list(znani[st])[0]
+    #v znanih sami različni      
+    k = len(neznani)
+    lst = list(neznani)
+    i = int(k * random())
+    prvi = lst[i]
+    if spomincek[prvi] in znani and len(znani[spomincek[prvi]]):
+        drugi = list(znani[spomincek[prvi]])[0]
+    elif m > 0:
+        drugi = prazniKand[0]
+    else:
+        j = int((k - 1) * random())
+        j += j >= i
+        drugi = lst[j]
+    return (prvi, drugi)
+    
+
+
 def upanja(stParov):
     #sveže poteze: 1
     #stare: 0
@@ -49,20 +77,23 @@ def upanja(stParov):
                 mat[m][m][0] = max(eSvSvTrue, eSvStTrue, (k + m)//2 - mat[m][k][1])
     return mat
 
-def taktikaMatej(znani, neznani, upanja, stJaz, stOn, aliStSt):
+def taktikaMatej(znani, neznani, upanja, stJaz, stOn, aliStSt, spomincek):
+    def p(m, k):
+        return min(1, m/k)
     epsi = 10**-10
     prazniKand = [None, None]
     m = 0
     for st in znani:
         m += len(znani[st])
         if len(znani[st]) == 2:#če kdaj k != 2: TU PORRAVI ...
+            print("    Našel sem par že na začetku:", znani[st])
             return tuple(znani[st])
         elif len(znani[st]) > 0:
             prazniKand[int(prazniKand[0] != None)] = list(znani[st])[0]
     #v znanih sami različni      
     k = len(neznani)
-
-    if k >= 2:
+    print("    Imamo {} znanih in {} neznanih.".format(m, k))
+    if k >= 2 and m >= 1:
         #sv/sv
         p1 = p(m, k)
         q1 = 1 - p1
@@ -76,6 +107,7 @@ def taktikaMatej(znani, neznani, upanja, stJaz, stOn, aliStSt):
         eSvSt = p1 * (1 + upanja[m - 1][k - 1][0]) + q1 * ((k + m)//2 - upanja[m + 1][k - 1][0])
         
     lst = list(neznani)
+    print("    lst =", lst)
 
     if m == 0:#"prva poteza"        
         i = int(k * random())
@@ -89,8 +121,8 @@ def taktikaMatej(znani, neznani, upanja, stJaz, stOn, aliStSt):
             i = int(k * random())
             prvi = lst[i]#neki neznani
             drugi = None
-            if prvi in znani:
-                drugi = list(znani[prvi])[0]#ker je itak sam en not
+            if spomincek[prvi] in znani and len(znani[spomincek[prvi]]) > 0:
+                drugi = list(znani[spomincek[prvi]])[0]#ker je itak sam en not
             if drugi == None:                
                 if eSvSt > eSvSv:                
                     drugi = prazniKand[0]
@@ -104,7 +136,7 @@ def taktikaMatej(znani, neznani, upanja, stJaz, stOn, aliStSt):
         if k <= m:#pol gremo ugant vse
             i = int(k * random())
             prvi = lst[i]#neki neznani
-            drugi = list(znani[prvi])[0]
+            drugi = list(znani[spomincek[prvi]])[0]
             return (prvi, drugi)
         else:
             #m >= 2, k > m
@@ -116,8 +148,8 @@ def taktikaMatej(znani, neznani, upanja, stJaz, stOn, aliStSt):
                     i = int(k * random())
                     prvi = lst[i]
                     drugi = None
-                    if prvi in znani:
-                        drugi = list(znani[prvi])[0]
+                    if spomincek[prvi] in znani and len(znani[spomincek[prvi]]) > 0:
+                        drugi = list(znani[spomincek[prvi]])[0]
                     if drugi == None:
                         if eSvSt > eSvSv:
                             drugi = prazniKand[0]#itak vseen, katerga praznga zbereš
@@ -133,8 +165,8 @@ def taktikaMatej(znani, neznani, upanja, stJaz, stOn, aliStSt):
                         i = int(k * random())
                         prvi = lst[i]
                         drugi = None
-                        if prvi in znani:
-                            drugi = list(znani[prvi])[0]
+                        if spomincek[prvi] in znani and len(znani[spomincek[prvi]]) > 0:
+                            drugi = list(znani[spomincek[prvi]])[0]
                         if drugi == None:
                             if eSvSt > eSvSv:
                                 drugi = prazniKand[0]#itak vseen, katerga praznga zbereš
@@ -155,8 +187,8 @@ def taktikaMatej(znani, neznani, upanja, stJaz, stOn, aliStSt):
                     i = int(k * random())
                     prvi = lst[i]
                     drugi = None
-                    if prvi in znani:
-                        drugi = list(znani[prvi])[0]
+                    if spomincek[prvi] in znani and len(znani[spomincek[prvi]]) > 0:
+                        drugi = list(znani[spomincek[prvi]])[0]
                     if drugi == None:
                         if eSvSt > eSvSv:
                             drugi = prazniKand[0]#itak vseen, katerga praznga zbereš
@@ -168,7 +200,47 @@ def taktikaMatej(znani, neznani, upanja, stJaz, stOn, aliStSt):
             
             
             
+def igra(k,n, str1, str2):
+    seed(10)
+    upan = upanja(n)
+    strat = [str1,str2]
+    spomin = k*list(range(n))
+    shuffle(spomin)
+    odkriti = {i:set() for i in range(n)}
+    neodkriti = set(range(2*n))
+    igralec = 0
+    prejsnjaNicNovih = False
 
+    najdeni = [0, 0]
+    print("Začenjam igro.")
+    print("položaj:\n", spomin)
+##    for x in upan:
+##        print(x)
+    while len(odkriti) + len(neodkriti) > 0:
+        print()
+        print("Na potezi je igralec", igralec)
+        print("odkriti:", odkriti)
+        print("skriti:", neodkriti)
+        f = strat[igralec]
+        (i,j) = f(odkriti, neodkriti, upan, najdeni[igralec], najdeni[1 - igralec], prejsnjaNicNovih, spomin)
+        print("Izbral je:", i, j)
+        odkriti[spomin[i]].add(i)
+        odkriti[spomin[j]].add(j)
+        if spomin[i] == spomin[j]:
+            print("Našel je par! ")
+            najdeni[igralec] += 1
+            del odkriti[spomin[i]]
+            prejsnjaNicNovih = False
+        else:
+            print("Zgrešil je! ")
+            igralec = 1 - igralec
+            #če smo izbrali stare in nismo dobili para:
+            if not (i in neodkriti or j in neodkriti):
+                prejsnjaNicNovih = True
+            else:
+                prejsnjaNicNovih = False
+        neodkriti -= {i,j}
+    return najdeni
 
 
 
