@@ -26,69 +26,72 @@ def nasprotnik(znani, neznani, upanja, stJaz, stOn, aliStSt, spomincek):
     return (prvi, drugi)
     
 
+slovar = {}
 
-def upanja(stParov):
-    #sveže poteze: 0
-    #stare: 1
+def verj(kaj, m, k, p1, p2, prejPra):
+    """kaj = 1 (zmaga), 0 (izen), -1 (poraz),
+       m,k = stevilo znanih, neznanih polj
+       p1, p2 = moj, tuj rezultat
+       prejPra = T/F in pove, ali je bila prejšnja prazna."""
     def p(m, k):
-        return min(1, Fraction(m,k))
-    n = 2 * stParov
-    mat = [[[None, None] for i in range(n + 1)] for ii in range(n + 1)]
-    #mat[m][k][prejsnja == prazna] = upanje, ko je m odkritih in k neodkritih | prejsnja = prazna
-
-    #če m >= k: lahko pobereš vse ...
-    for m in range(n + 1):
-        for k in range(m + 1):
-            if m + k <= n and (m + k)% 2 == 0:
-                mat[m][k] = [(m + k)//2, (m + k)//2]#katere je itak vseen, bomo to v takitki premisll ...
+        return min(1, m/k)
+    def pp(k):
+        return 1/k
+    klj = (kaj, m, k, p1, p2, prejPra)
+    if klj in slovar:
+        return slovar[klj]
+   
+    vred = None
+    if kaj != 0:
+        if m >= k:
+            konc = p1 + (m + k)//2
+            if kaj == 1:
+                vred = int(konc > p2)
             else:
-                mat[m][k] = [None, None]
+                vred = int(konc < p2)
+        elif m == 0:
+            #sv/sv
+            vred = pp(k - 1) * verj(kaj, m, k - 2, p1 + 1, p2, False) + (1 - pp(k - 1)) * (1 - (verj(0, m + 2, k - 2, p2, p1, False) + verj(kaj, m + 2, k - 2, p2, p1, False)))
+        elif m == 1:#k >= 2
+            #sv/sv ali sv/st
+            operator = [max, min][kaj == -1]
+##            svsv = p(m, k) * operator(verj(kaj, m - 1, k - 1, p1 + 1, p2, False),
+##                                      1 - (verj(kaj, m + 1, k - 1, p2, p1, False) + verj(0, m + 1, k - 1, p2, p1, False )))#odkriješ par in ga vzameš/pustiš
+            #privzamemo, da potencialni par vedno vzameš
+            svsv = p(m, k) * verj(kaj, m - 1, k - 1, p1 + 1, p2, False)
+            svst = svsv
+            svsv += (1 - p(m, k)) * (pp(k - 1) * verj(kaj, m, k - 2, p1 + 1, p2, False) + (1 - pp(k - 1)) * (1 - verj(kaj, m + 2, k - 2, p2, p1, False) - verj(0, m + 2, k - 2, p2, p1, False)))
+            svst += (1 - p(m, k)) * (1 - verj(0, m + 1, k - 1, p2, p1, False) - verj(kaj, m + 1, k - 1, p2, p1, False))
+            vred = operator(svsv, svst)
+            
+        elif m >= 2:
+            #sv/sv ali sv/st ali st/st
+            #SKOPIRANO OD m == 1
+            #sv/sv ali sv/st
+            operator = [max, min][kaj == -1]
+##            svsv = p(m, k) * operator(verj(kaj, m - 1, k - 1, p1 + 1, p2, False),
+##                                      1 - (verj(kaj, m + 1, k - 1, p2, p1, False) + verj(0, m + 1, k - 1, p2, p1, False )))#odkriješ par in ga vzameš/pustiš
+            #privzamemo, da potencialni par vedno vzameš
+            svsv = p(m, k) * verj(kaj, m - 1, k - 1, p1 + 1, p2, False)
+            svst = svsv
+            svsv += (1 - p(m, k)) * (pp(k - 1) * verj(kaj, m, k - 2, p1 + 1, p2, False) + (1 - pp(k - 1)) * (1 - verj(kaj, m + 2, k - 2, p2, p1, False) - verj(0, m + 2, k - 2, p2, p1, False)))
+            svst += (1 - p(m, k)) * (1 - verj(0, m + 1, k - 1, p2, p1, False) - verj(kaj, m + 1, k - 1, p2, p1, False))
 
-    #sicer pa rekurzija: najprej za X | True, potem pa še X | False
-    for k in range(1, n + 1):
-        for m in range(k%2, min(k, n - k + 1), 2):#m < k in m + k <= n ... prvi stolpec (k = 1) pustimo pri miru
-##            print("m k =", m, k)
-            #"prva poteza"
-            if m == 0:#k > m in k sod ... k >= 2
-                pr = Fraction(2 , k * (k - 1))
-                #vrednosti mat[0][k][1] ne potrebujemo
-                mat[0][k][0] = pr * (1 + mat[0][k - 2][0]) + (1 - pr) * (k//2 - mat[2][k - 2][0]) #izbrat moraš 2 sveži + prej ni bila prazna poteza
-            elif m == 1:#k >= 2
-                #sv/sv
-                p1 = p(m, k)
-                q1 = 1 - p1
-                p2 = Fraction(1, k - 1)
-                q2 = 1 - p2
-                eSvSvTrue = p1 * (1 + mat[m - 1][k - 1][0]) + q1 * (p2 * (1 + mat[m][k - 2][0]) + q2 * ((k + m)//2 - mat[m + 2][k - 2][0]))
-                #ali pa sv/st
-##                print("mat[m,k]",mat[m][k])
-                eSvStTrue = p1 * (1 + mat[m - 1][k - 1][0]) + q1 * ((k + m)//2 - mat[m + 1][k - 1][0])
-                maksi = max(eSvSvTrue, eSvStTrue)
-                mat[m][k][1] = maksi#ker ne moremo narediti (st, st) poteze
-                mat[m][k][0] = maksi
-            else:#k >= 2, m >= 2
-                #sv/sv
-                p1 = p(m, k)
-                q1 = 1 - p1
-                p2 = Fraction(1, k - 1)
-                q2 = 1 - p2
-                eSvSvTrue = p1 * (1 + mat[m - 1][k - 1][0]) + q1 * (p2 * (1 + mat[m][k - 2][0]) + q2 * ((k + m)//2 - mat[m + 2][k - 2][0]))
-                #ali pa sv/st
-                eSvStTrue = p1 * (1 + mat[m - 1][k - 1][0]) + q1 * ((k + m)//2 - mat[m + 1][k - 1][0])
-                #ali pa st/st
-                eStStTrue = 0
-                mat[m][k][1] = max(eSvSvTrue, eSvStTrue, eStStTrue)#verjetno je zadnji (= 0) odveč ...
-                mat[m][k][0] = max(eSvSvTrue, eSvStTrue, (k + m)//2 - mat[m][k][1])
-##            print("po: ", mat[m][k])
-    return mat
-def izpisi(up):
-    for x in up:
-        for y in x:
-            print("[{:.2f}, {:.2f}]".format(y[0] if y[0] != None else -1,  y[1] if y[1] != None else -1), end = "")
-        print()
-def taktikaMatej(znani, neznani, upanja, stJaz, stOn, aliStSt, spomincek):
+            if prejPra:
+                stst = [int(p1 < p2), int(p1 > p2)][kaj == 1]
+            else:
+                stst = 1 - (verj(kaj, m, k, p2, p1, True) + verj(0, m, k, p2, p1, True))
+            vred = operator(svsv, svst, stst)
+        slovar[klj] = vred
+        return vred
+    else:
+        return 1 - (verj(1, m, k, p2, p1, prejPra) + verj(-1, m, k, p2, p1, prejPra))
+
+def taktikaMatej(znani, neznani, stJaz, stOn, aliStSt, spomincek):
     def p(m, k):
-        return min(1,Fraction(m, k))
+        return min(1, m / k)
+    def pp(k):
+        return 1 / k
 ##    epsi = 10**-10
     prazniKand = [None, None]
     m = 0
