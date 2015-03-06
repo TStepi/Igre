@@ -88,6 +88,7 @@ def verj(kaj, m, k, p1, p2, prejPra):
         return 1 - (verj(1, m, k, p2, p1, prejPra) + verj(-1, m, k, p2, p1, prejPra))
 
 def taktikaMatej(znani, neznani, stJaz, stOn, aliStSt, spomincek):
+    """Za kriterijsko funkcijo je treba vzet E[st točk na igro] = p(zmaga) - p(poraz)"""
     def p(m, k):
         return min(1, m / k)
     def pp(k):
@@ -107,16 +108,10 @@ def taktikaMatej(znani, neznani, stJaz, stOn, aliStSt, spomincek):
 ##    print("    Imamo {} znanih in {} neznanih.".format(m, k))
     if k >= 2 and m >= 1:
         #sv/sv
-        p1 = p(m, k)
-        q1 = 1 - p1
-        p2 = Fraction(1, k - 1)
-        q2 = 1 - p2
-        eSvSv = p1 * (1 + upanja[m - 1][k - 1][0]) + q1 * (p2 * (1 + upanja[m][k - 2][0]) + q2 * ((k + m)//2 - upanja[m + 2][k - 2][0]))
+        razSvSv = pp(k - 1) * (verj(1, m, k - 2, p1 + 1, p2, False) - verj(0, m, k - 2, p1 + 1, p2, False)) + (1 - pp(k - 1)) * (verj(1, m + 2, k - 2, p2, p1, False) - verj(-1, m + 2, k - 2, p2, p1, False))
     if k >= 1 and m >= 1:
         #sv/st
-        p1 = p(m, k)
-        q1 = 1 - p1
-        eSvSt = p1 * (1 + upanja[m - 1][k - 1][0]) + q1 * ((k + m)//2 - upanja[m + 1][k - 1][0])
+        razSvSt = verj(1, m + 1, k - 1, p2, p1, False) - verj(-1, m + 1, k - 1, p2, p1, False)
         
     lst = list(neznani)
 ##    print("    lst =", lst)
@@ -142,7 +137,7 @@ def taktikaMatej(znani, neznani, stJaz, stOn, aliStSt, spomincek):
                 drugi = list(znani[spomincek[prvi]])[0]#ker je itak sam en not
             if drugi == None:
 ##                print("    ni para.")
-                if eSvSt > eSvSv:
+                if razSvSt > razSvSv:
 ##                    print("    bolj se splača staro ugibat")
                     drugi = prazniKand[0]
                 else:
@@ -179,7 +174,7 @@ def taktikaMatej(znani, neznani, stJaz, stOn, aliStSt, spomincek):
                         drugi = list(znani[spomincek[prvi]])[0]
                     if drugi == None:
 ##                        print("    ni para.")
-                        if eSvSt > eSvSv:
+                        if razSvSt > razSvSv:
 ##                            print("    bolj se splača starega")
                             drugi = prazniKand[0]#itak vseen, katerga praznga zbereš
                         else:
@@ -190,8 +185,8 @@ def taktikaMatej(znani, neznani, stJaz, stOn, aliStSt, spomincek):
                     return (prvi, drugi)
                 else:#stJaz == stOn
 ##                    print("    tretnuno sva izenačena")
-                    d = max(eSvSv, eSvSt)
-                    if stJaz + d > stOn + (k + m)//2 - d:
+                    d = max(razSvSv, razSvSt)
+                    if d > 0:#s to igro pridobim
 ##                        print("    splača se mi ugibat")
                         #se splača ugibat: skopiramo prejsnji razmislek
                         i = int(k * random())
@@ -203,7 +198,7 @@ def taktikaMatej(znani, neznani, stJaz, stOn, aliStSt, spomincek):
                             drugi = list(znani[spomincek[prvi]])[0]
                         if drugi == None:
 ##                            print("    ni para.")
-                            if eSvSt > eSvSv:
+                            if razSvSt > razSvSv:
 ##                                print("    bolj se splača starega")
                                 drugi = prazniKand[0]#itak vseen, katerga praznga zbereš
                             else:
@@ -218,7 +213,8 @@ def taktikaMatej(znani, neznani, stJaz, stOn, aliStSt, spomincek):
                         return tuple(prazniKand)
             else:
 ##                print("    nazadne normalna poteza")
-                eStSt = (k + m)//2 - upanja[m][k][1]
+                #DO TU SEM KOKER TOK ZIHER; OD TU NAPREJ JE ŠE TREBA
+                razStSt = verj(1, m, k, p1, p2)
                 m = max(eStSt, eSvSv, eSvSt)
                 if eStSt == m:#itak mamo ful natančno
 ##                    print("    najboljš prazna")
