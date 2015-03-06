@@ -2,9 +2,6 @@ from random import *
 from matej import taktikaMatej
 from tomaz import taktikaTomaz
 
-n = 10
-k = 2
-
 def nakljucna(spomin, odkriti, neodkriti, mojipari, tvojipari, bednapoteza):
     #print("Naključnež")
     mozni = {x for x in neodkriti}

@@ -3,7 +3,7 @@ def p(m, k):
         return min(1, m / k)
 def pp(k):
     return 1 / k
-def nasprotnik(znani, neznani, stJaz, stOn, aliStSt, spomincek):
+def nasprotnik(spomincek, znani, neznani, stJaz, stOn, aliStSt):
     epsi = 10**-10
     prazniKand = [None, None]
     m = 0
@@ -119,7 +119,7 @@ def verjStSt(kaj, m, k, ig1, ig2, prejPra):
     
     
 
-def taktikaMatej(znani, neznani, ig1, ig2, aliStSt, spomincek):
+def taktikaMatej(spomincek, znani, neznani, ig1, ig2, aliStSt):
     """Za kriterijsko funkcijo je treba vzet E[st točk na igro] = p(zmaga) - p(poraz)"""
     prazniKand = [None, None]
     m = 0
@@ -188,8 +188,8 @@ def taktikaMatej(znani, neznani, ig1, ig2, aliStSt, spomincek):
                 ststP = verjStSt(-1, m, k, ig1, ig2, aliStSt)
 
                 if ststZ + svsvP > svsvZ + ststP and ststZ + svstP > svstZ + ststP:
-                    print("    prazna poteza ...")
-                    return tuple(prazniKand[0])
+##                    print("    prazna poteza ...")
+                    return tuple(prazniKand)
                 else:
                     i = int(k * random())
                     prvi = lst[i]
@@ -241,7 +241,7 @@ def igra(k,n, str1, str2):
         
         f = strat[igralec]
 ##        print(f.__name__)
-        (i,j) = f(odkriti, neodkriti, najdeni[igralec], najdeni[1 - igralec], prejsnjaNicNovih, spomin)
+        (i,j) = f(spomin, odkriti, neodkriti, najdeni[igralec], najdeni[1 - igralec], prejsnjaNicNovih)
         prejsnjaNicNovih = False
 ##        print("Izbral je:", i, j)
         odkriti[spomin[i]].add(i)
