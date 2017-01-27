@@ -1,2 +1,2 @@
-def pozeta(igra):
-    return igra.zmagovita_poteza()
+def taktikaMatej():
+    return "škis++"
