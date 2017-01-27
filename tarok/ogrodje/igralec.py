@@ -1,5 +1,5 @@
-from .odlocanje.licitacijska_funkcija import LicitacijskaFunkcija
-from .odlocanje.funkcija_poteze import FunkcijaPoteze
+from ogrodje.odlocanje.licitacijska_funkcija import LicitacijskaFunkcija
+from ogrodje.odlocanje.funkcija_poteze import FunkcijaPoteze
 from random import shuffle, random
 
 

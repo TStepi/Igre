@@ -1,4 +1,4 @@
-from ..tipi import IGRE
+from ogrodje.tipi import IGRE
 
 
 class LicitacijskaFunkcija:

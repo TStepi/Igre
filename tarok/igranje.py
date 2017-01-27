@@ -1,12 +1,12 @@
-from .ogrodje.tarok import Tarok
-from .ogrodje.igralec import Igralec
-from .ogrodje.odlocanje.matej import taktikaMatej
-from .ogrodje.odlocanje.butelj import nakljucnaTaktika
+from ogrodje.tarok import Tarok
+from ogrodje.igralec import Igralec
+from ogrodje.odlocanje.matej import potezaMatej, licitacijaMatej
+from ogrodje.odlocanje.butelj import nakljucnaPoteza, nakljucnaLicitacija
 
 
-tomaz = Igralec(False, 1, taktikaMatej)
-matej = Igralec(False, 2, taktikaMatej)
-butelj = Igralec(False, 3, nakljucnaTaktika)
+matej = Igralec(False, 2, potezaMatej, licitacijaMatej)
+butelj = Igralec(False, 3, nakljucnaPoteza, nakljucnaLicitacija)
+butelj2 = Igralec(False, 43, )
 
 
 igra = Tarok([tomaz, matej, butelj])

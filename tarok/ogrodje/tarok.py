@@ -1,4 +1,4 @@
-from .igralec import Igralec
+from ogrodje.igralec import Igralec
 
 from .karte import KARTE
 
