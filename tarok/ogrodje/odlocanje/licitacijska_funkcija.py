@@ -1,8 +1,11 @@
+from ..tipi import IGRE
+
+
 class LicitacijskaFunkcija:
     def __init__(self, funkcija):
         self.funkcija = funkcija
 
-    def izracunaj(self, postavitev_igralcev, dosedanji_klici, id_igralca, karte_igralca):
+    def izracunaj(self, postavitev_igralcev, dosedanji_klici, id_igralca, karte_igralca, dovoljene_igre):
         """
         Izracuna potezo.
         :param postavitev_igralcev: (ciklicni) seznam [igralec1_id, igralec2_id, ...], ki doloca vrstni red v igri
@@ -11,4 +14,4 @@ class LicitacijskaFunkcija:
         :param karte_igralca: mnozica Kart, ki jih ima igralec v rokah
         :return:
         """
-        return self.funkcija(postavitev_igralcev, dosedanji_klici, id_igralca, karte_igralca)
+        return self.funkcija(postavitev_igralcev, dosedanji_klici, id_igralca, karte_igralca, dovoljene_igre)

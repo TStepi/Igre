@@ -29,3 +29,5 @@ class TipIgre:
         self.ime = ime
         self.vrednost = VREDNOSTI_IGER[ime]
         self.iz_talona = IZ_TALONA[ime]
+
+IGRE = {TipIgre(ime) for ime in VREDNOSTI_IGER}
