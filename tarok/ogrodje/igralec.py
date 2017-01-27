@@ -40,19 +40,20 @@ class Igralec:
         shuffle(kup_kart)
 
     def privzdigni(self, kup_kart):
-        raise Exception("oglej si pravila privzdigovanja")
+        i = int(random() * len(kup_kart))
+        return kup_kart[i:] + kup_kart[:i]
 
     def razdeli(self, sez_kart, igralci):
+        talon = sez_kart[:6]
         st_igralcev = len(igralci)
+        ind = 6
         stevilo_kart = (len(sez_kart) - 6) // st_igralcev
         # proper deljenje
         st_krogov = 2
-        ind = 0
         for krog in range(st_krogov):
             for i in range(st_igralcev):
                 kolko = stevilo_kart // st_krogov
                 paketek = {sez_kart[ind + j] for j in range(kolko)}
                 igralci[i].dvigni_karte_z_mize(paketek)
                 ind += kolko
-        talon = sez_kart[-6:] # talon na konc:)
         return talon
