@@ -1,6 +1,7 @@
-from ogrodje.razno import *
-from ogrodje.matej import taktikaMatej
-from ogrodje.butelj import nakljucnaTaktika
+from .ogrodje.tarok import Tarok
+from .ogrodje.igralec import Igralec
+from .ogrodje.odlocanje.matej import taktikaMatej
+from .ogrodje.odlocanje.butelj import nakljucnaTaktika
 
 
 tomaz = Igralec(False, 1, taktikaMatej)
