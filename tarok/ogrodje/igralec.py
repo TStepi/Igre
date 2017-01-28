@@ -1,7 +1,7 @@
 from ogrodje.odlocanje.licitacijska_funkcija import LicitacijskaFunkcija
 from ogrodje.odlocanje.funkcija_poteze import FunkcijaPoteze
 from random import shuffle, random
-from typing import List, Set, Tuple
+from typing import List, Set, Tuple, Iterable
 from ogrodje.karte import Karta
 from ogrodje.tipi import TipIgre
 
@@ -28,13 +28,18 @@ class Igralec:
     def __eq__(self, other):
         return self.id == other.id
 
-    def dvigni_karte_z_mize(self, karte: Set[Karta]) -> None:
+    def poberi_dodeljene_karte(self, karte: Iterable[Karta]) -> None:
         """
         Shranimo mnozico Kart v self.karte
         :param karte: mnozica dodeljenih Kart
         :return:
         """
-        self.karte |= karte
+        for karta in karte:
+            self.karte.add(karta)
+
+    def poberi_stih(self, karte: Iterable[Karta]) -> None:
+        for karta in karte:
+            self.pobrano.add(karta)
 
     def licitiraj(self,
                   postavitev_igralcev: 'List[Igralec]',
@@ -48,10 +53,12 @@ class Igralec:
 
     def odigraj_potezo(self,
                        postavitev_igralcev: 'List[Igralec]',
-                       dosedanje_poteze: List[List[Tuple[int, Karta]]]
+                       dosedanje_poteze: 'List[List[Tuple[Igralec, Karta]]]'
                        ) -> Karta:
         dovoljene = self.dopustne_karte([karta for (_, karta) in dosedanje_poteze[-1]])
-        return self.funkcija_poteze.izracunaj(postavitev_igralcev, dosedanje_poteze, self.id, self.karte, dovoljene)
+        izbrana = self.funkcija_poteze.izracunaj(postavitev_igralcev, dosedanje_poteze, self.id, self.karte, dovoljene)
+        self.karte.remove(izbrana)
+        return izbrana
 
     def premesaj(self, kup_kart: List[Karta]) -> None:
         shuffle(kup_kart)
@@ -71,6 +78,6 @@ class Igralec:
             for i in range(st_igralcev):
                 kolko = stevilo_kart // st_krogov
                 paketek = {sez_kart[ind + j] for j in range(kolko)}
-                igralci[i].dvigni_karte_z_mize(paketek)
+                igralci[i].poberi_dodeljene_karte(paketek)
                 ind += kolko
         return talon

@@ -1,12 +1,13 @@
 from typing import Tuple, Set, Any
-
+from fractions import Fraction
 
 class Karta:
     def __init__(self, barva: str, stevilcna_vrednost: int) -> None:
         assert (barva, stevilcna_vrednost) in karte_pomo
         self.barva = barva
         self.stevilcna_vrednost = stevilcna_vrednost
-        self.tockovna_vrednost = TOCKE[(self.barva, self.stevilcna_vrednost)]
+        # Se spomnimo? http://putka.upm.si/tasks/2011/2011_3kolo/tarok
+        self.tockovna_vrednost = TOCKE[(self.barva, self.stevilcna_vrednost)] - Fraction(2, 3)
 
     def __repr__(self):
         return "Predstavitev karte za v tkinter"

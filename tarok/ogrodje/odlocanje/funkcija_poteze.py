@@ -5,13 +5,13 @@ from ogrodje.karte import Karta
 
 class FunkcijaPoteze:
     def __init__(self,
-                 funkcija: Callable[[List[Igralec], List[List[Tuple[int, Karta]]], int, Set[Karta], Set[Karta]], Karta]
+                 funkcija: Callable[[List[Igralec], List[List[Tuple[Igralec, Karta]]], int, Set[Karta], Set[Karta]], Karta]
                  ) -> None:
         self.funkcija = funkcija
 
     def izracunaj(self,
                   postavitev_igralcev: List[Igralec],
-                  dosedanje_poteze: List[List[Tuple[int, Karta]]],
+                  dosedanje_poteze: List[List[Tuple[Igralec, Karta]]],
                   id_igralca: int,
                   vse_karte_igralca: Set[Karta],
                   dovoljene_karte_igralca: Set[Karta]
