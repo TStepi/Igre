@@ -1,16 +1,18 @@
 from ogrodje.igralec import Igralec
 from ogrodje.tipi import TipIgre
 from ogrodje.karte import Karta
-from typing import List, Set
+from typing import List, Set, Callable, Tuple
 
 
 class LicitacijskaFunkcija:
-    def __init__(self, funkcija):
+    def __init__(self,
+                 funkcija: Callable[[List[Igralec], List[Tuple[int, TipIgre]], int, Set[Karta], Set[TipIgre]], TipIgre]
+                 ) -> None:
         self.funkcija = funkcija
 
     def izracunaj(self,
                   postavitev_igralcev: List[Igralec],
-                  dosedanji_klici: List[TipIgre],
+                  dosedanji_klici: List[Tuple[int, TipIgre]],
                   id_igralca: int,
                   karte_igralca: Set[Karta],
                   dovoljene_igre: Set[TipIgre]) -> TipIgre:

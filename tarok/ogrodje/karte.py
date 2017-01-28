@@ -2,7 +2,7 @@ from typing import Tuple, Set, Any
 
 
 class Karta:
-    def __init__(self, barva, stevilcna_vrednost):
+    def __init__(self, barva: str, stevilcna_vrednost: int) -> None:
         assert (barva, stevilcna_vrednost) in karte_pomo
         self.barva = barva
         self.stevilcna_vrednost = stevilcna_vrednost
@@ -42,4 +42,4 @@ for karta in karte_pomo:
         vred = 1
     TOCKE[karta] = vred
 
-KARTE = {Karta(barva, vred) for (barva, vred) in karte_pomo}
+KARTE = {Karta(barva, vred) for (barva, vred) in karte_pomo}  # type: Set[Karta]

@@ -1,8 +1,21 @@
+from typing import List, Tuple, Set, Callable
+from ogrodje.igralec import Igralec
+from ogrodje.karte import Karta
+
+
 class FunkcijaPoteze:
-    def __init__(self, funkcija):
+    def __init__(self,
+                 funkcija: Callable[[List[Igralec], List[List[Tuple[int, Karta]]], int, Set[Karta], Set[Karta]], Karta]
+                 ) -> None:
         self.funkcija = funkcija
 
-    def izracunaj(self, postavitev_igralcev, dosedanje_poteze, id_igralca, vse_karte_igralca, dovoljene_karte_igralca):
+    def izracunaj(self,
+                  postavitev_igralcev: List[Igralec],
+                  dosedanje_poteze: List[List[Tuple[int, Karta]]],
+                  id_igralca: int,
+                  vse_karte_igralca: Set[Karta],
+                  dovoljene_karte_igralca: Set[Karta]
+                  ) -> Karta:
         """
         Izracuna potezo.
         :param postavitev_igralcev: (ciklicni) seznam [igralec1_id, igralec2_id, ...], ki doloca vrstni red v igri

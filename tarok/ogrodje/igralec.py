@@ -1,7 +1,7 @@
 from ogrodje.odlocanje.licitacijska_funkcija import LicitacijskaFunkcija
 from ogrodje.odlocanje.funkcija_poteze import FunkcijaPoteze
 from random import shuffle, random
-from typing import List, Set
+from typing import List, Set, Tuple
 from ogrodje.karte import Karta
 from ogrodje.tipi import TipIgre
 
@@ -25,6 +25,9 @@ class Igralec:
         self.karte = set()  # type: Set[Karta]
         self.pobrano = set()  # type: Set[Karta]
 
+    def __eq__(self, other):
+        return self.id == other.id
+
     def dvigni_karte_z_mize(self, karte: Set[Karta]) -> None:
         """
         Shranimo mnozico Kart v self.karte
@@ -35,15 +38,19 @@ class Igralec:
 
     def licitiraj(self,
                   postavitev_igralcev: 'List[Igralec]',
-                  dosedanje_licitiranje: List[TipIgre],
-                  dovoljene_igre: Set[TipIgre]) -> TipIgre:
+                  dosedanje_licitiranje: List[Tuple[int, TipIgre]],
+                  dovoljene_igre: Set[TipIgre]
+                  ) -> TipIgre:
         return self.licitacijska_funkcija.izracunaj(postavitev_igralcev, dosedanje_licitiranje, self.id, self.karte, dovoljene_igre)
 
     def dopustne_karte(self, seznam_odvrzenih: List[Karta]) -> Set[Karta]:
         raise Exception("hihi")
 
-    def odigraj_potezo(self, postavitev_igralcev, dosedanje_poteze):
-        dovoljene = self.dopustne_karte(dosedanje_poteze[-1])
+    def odigraj_potezo(self,
+                       postavitev_igralcev: 'List[Igralec]',
+                       dosedanje_poteze: List[List[Tuple[int, Karta]]]
+                       ) -> Karta:
+        dovoljene = self.dopustne_karte([karta for (_, karta) in dosedanje_poteze[-1]])
         return self.funkcija_poteze.izracunaj(postavitev_igralcev, dosedanje_poteze, self.id, self.karte, dovoljene)
 
     def premesaj(self, kup_kart: List[Karta]) -> None:

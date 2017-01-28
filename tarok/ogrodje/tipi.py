@@ -30,4 +30,10 @@ class TipIgre:
         self.vrednost = VREDNOSTI_IGER[ime]
         self.iz_talona = IZ_TALONA[ime]
 
-IGRE = {TipIgre(ime) for ime in VREDNOSTI_IGER} # type: Set[TipIgre]
+    def __eq__(self, other):
+        return self.vrednost == other.vrednost
+
+    def __lt__(self, other):
+        return self.vrednost < other.vrednost
+
+IGRE = {ime: TipIgre(ime) for ime in VREDNOSTI_IGER} # type: Dict[str, TipIgre]
