@@ -1,3 +1,6 @@
+from typing import Tuple, Set, Any
+
+
 class Karta:
     def __init__(self, barva, stevilcna_vrednost):
         assert (barva, stevilcna_vrednost) in karte_pomo
@@ -21,7 +24,7 @@ KARA = "kara"
 
 SLIKICE = [POB, KAVAL, BABA, KRALJ]
 BARVE = [PIK, KRIZ, SRCE, KARA]
-karte_pomo = {(barva, slika) for barva in BARVE for slika in SLIKICE}
+karte_pomo = {(barva, slika) for barva in BARVE for slika in SLIKICE}  # type: Set[Tuple[str, Any]]
 
 for i in range(len(BARVE)):
     obseg = range(7, 11) if i < 2 else range(1, 5)

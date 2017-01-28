@@ -1,9 +1,10 @@
 from ogrodje.igralec import Igralec
+from ogrodje.karte import KARTE
+from typing import List
 
-from .karte import KARTE
 
 class Tarok:
-    def __init__(self, igralci):
+    def __init__(self, igralci: List[Igralec]) -> None:
         """
         :param igralci: seznam Igralcev
         :return:
@@ -13,12 +14,13 @@ class Tarok:
         self.mesalec = self.igralci[0]
         self.privzigovalec = self.igralci[1]
 
-
     def licitacija(self):
         aktivni_igralec = None
         tip_igre = None
+        seznam_licitacij = []
         for igralec in self.igralci:
-            igralec.licitiraj()
+            nova = igralec.licitiraj(self.igralci, seznam_licitacij)
+            seznam_licitacij.append(nova)
 
         self.aktivni_igralec = aktivni_igralec
         self.tip_igre = tip_igre
@@ -36,7 +38,7 @@ class Tarok:
         self.mesalec.premesaj(kupcek)
         self.privzigovalec.privzdigni(kupcek)
 
-        talon = self.mesalec.razdeli(kupcek) # po tem trenutku imajo vsi igralci svoje karte
+        talon = self.mesalec.razdeli(kupcek, self.igralci)  # po tem trenutku imajo vsi igralci svoje karte
 
         self.licitacija()
 

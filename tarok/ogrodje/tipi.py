@@ -30,4 +30,4 @@ class TipIgre:
         self.vrednost = VREDNOSTI_IGER[ime]
         self.iz_talona = IZ_TALONA[ime]
 
-IGRE = {TipIgre(ime) for ime in VREDNOSTI_IGER}
+IGRE = {TipIgre(ime) for ime in VREDNOSTI_IGER} # type: Set[TipIgre]

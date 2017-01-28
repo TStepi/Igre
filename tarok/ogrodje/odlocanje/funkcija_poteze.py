@@ -1,6 +1,6 @@
 class FunkcijaPoteze:
     def __init__(self, funkcija):
-        self.odlocitvena = funkcija
+        self.funkcija = funkcija
 
     def izracunaj(self, postavitev_igralcev, dosedanje_poteze, id_igralca, vse_karte_igralca, dovoljene_karte_igralca):
         """
