@@ -1,3 +1,4 @@
+from ogrodje.bonus import BONUSI, BONUS_PAGAT_ULTIMO
 from ogrodje.igralec import Igralec
 from ogrodje.karte import KARTE
 from typing import List, Tuple
@@ -5,6 +6,8 @@ from typing import List, Tuple
 from ogrodje.karte import Karta
 from ogrodje.tipi import TipIgre, IGRE, KLOP, BERAC, ODPRTI_BERAC, SOLO_BREZ
 
+
+VSE_TOCKE = 70
 
 class Tarok:
     def __init__(self, igralci: List[Igralec]) -> None:
@@ -15,40 +18,47 @@ class Tarok:
         assert len(igralci) == 3
         self.igralci = igralci
         self.mesalec = self.igralci[0]
+        self.aktivni_igralec = self.igralci[1] # ta po defaultu zacne
         self.privzigovalec = self.igralci[2]  # ok za 3 in 4 igralce
-
-        self.tocke = {}  # type: Dict[Igralec, int]
+        self.talon = []              # type: List[Karta]
+        self.pobrano_iz_talona = []  # type: List[Karta]
+        self.tip_igre = KLOP         # type: TipIgre
+        self.tocke = {}              # type: Dict[Igralec, int]
 
     def licitacija(self) -> None:
         aktivni_licitatorji = self.igralci[2:] + self.igralci[:2]
         s_prednostjo = aktivni_licitatorji[-1]
-        najvisja = KLOP  # type: TipIgre
         seznam_licitacij = []  # type: List[Tuple[int, TipIgre]]
         while len(aktivni_licitatorji) > 0:
             pomo = []
             for igralec in aktivni_licitatorji:
                 na_izbiro = {igra for igra in IGRE if igra == KLOP or
-                                                      igra > najvisja or
-                                                      igra == najvisja and igralec == s_prednostjo}
+                                                      igra > self.tip_igre or
+                                                      igra == self.tip_igre and igralec == s_prednostjo}
                 igra = igralec.licitiraj(self.igralci, seznam_licitacij, na_izbiro)
                 seznam_licitacij.append((igralec.id, igra))
                 if igra.ime != KLOP:
                     pomo.append(igralec)
                 else:
                     self.aktivni_igralec = igralec
-                    najvisja = igra
+                    self.tip_igre = igra
             aktivni_licitatorji = [igralec for igralec in pomo]
 
-        self.tip_igre = najvisja
+    def poskrbi_za_talon(self):
+        k = self.tip_igre.iz_talona
+        if k > 0:
+            moznosti = [self.talon[k * i:k * (i + 1)] for i in range(6 // k)]
+            self.pobrano_iz_talona = self.aktivni_igralec.izberi_iz_talona(moznosti)
+            self.aktivni_igralec.zamenjaj_s_talonom(self.pobrano_iz_talona)
 
     def odigraj_runde(self) -> None:
-        rund = len(self.aktivni_igralec.karte)
+        self.st_rund = len(self.aktivni_igralec.karte)
         prvi = 1
         if self.tip_igre in {BERAC, ODPRTI_BERAC, SOLO_BREZ}:
             prvi = self.igralci.index(self.aktivni_igralec)
         n = len(self.igralci)
         poteze = []  # type: List[List[Tuple[Igralec, Karta]]]
-        for runda in range(rund):
+        for runda in range(self.st_rund):
             poteze.append([])
             for j in range(n):
                 igralec = self.igralci[(prvi + j) % n]
@@ -61,20 +71,38 @@ class Tarok:
         return stih[0][0]
 
     def prestej_tocke(self) -> None:
-        for igralec in self.igralci:
-            vsota = 0
-            for karta in igralec.pobrano:
-                vsota += karta.tockovna_vrednost
-            self.tocke[igralec] = round(vsota)
+        if self.aktivni_igralec.st_pobranih_stihov in [0, self.st_rund]:
+            aktivni_valat = self.aktivni_igralec.st_pobranih_stihov == self.st_rund
+            for igralec in self.igralci:
+                tocke = VSE_TOCKE if aktivni_valat == (igralec == self.aktivni_igralec) else 0
+                self.tocke[igralec] = tocke
+        else:
+            for igralec in self.igralci:
+                vsota = 0
+                for stih in igralec.pobrano:
+                    for karta in stih:
+                        vsota += karta.tockovna_vrednost
+                self.tocke[igralec] = round(vsota)
+            # bonusi
+            ekipe = [[igralec for igralec in self.igralci if (self.aktivni_igralec == igralec) == tf] for tf in [True, False]]
+            for ekipa in ekipe:
+                for bonus in BONUSI:
+                    if bonus != BONUS_PAGAT_ULTIMO:  # TODO: kako je s pogatom
+                        pobrano_ekipa = [stih for stih in igralec.pobrano for igralec in ekipa]
+                        if bonus.pogoj(pobrano_ekipa):
+                            for igralec in ekipa:
+                                self.tocke[igralec] += bonus.vrednost  # TODO: napovedani
 
     def odigraj_igro(self):
         kupcek = [karta for karta in KARTE]
         self.mesalec.premesaj(kupcek)
         self.privzigovalec.privzdigni(kupcek)
 
-        talon = self.mesalec.razdeli(kupcek, self.igralci)  # po tem trenutku imajo vsi igralci svoje karte
+        self.talon = self.mesalec.razdeli(kupcek, self.igralci)  # po tem trenutku imajo vsi igralci svoje karte
 
         self.licitacija()
+
+        self.poskrbi_za_talon()
 
         self.odigraj_runde()
 

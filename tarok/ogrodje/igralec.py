@@ -1,8 +1,11 @@
-from ogrodje.odlocanje.licitacijska_funkcija import LicitacijskaFunkcija
-from ogrodje.odlocanje.funkcija_poteze import FunkcijaPoteze
 from random import shuffle, random
+
 from typing import List, Set, Tuple, Iterable
+
 from ogrodje.karte import Karta
+from ogrodje.odlocanje.definicije.funkcija_poteze import FunkcijaPoteze
+from ogrodje.odlocanje.definicije.licitacijska_funkcija import LicitacijskaFunkcija
+from ogrodje.odlocanje.definicije.talonski_funkciji import IzbiralkaIzTalona, MenjalkaSTalonom
 from ogrodje.tipi import TipIgre
 
 
@@ -11,7 +14,10 @@ class Igralec:
                  je_clovek: bool,
                  id_stevilka: int,
                  funkcija_poteze: FunkcijaPoteze,
-                 licitacijska_funkcija: LicitacijskaFunkcija) -> None:
+                 licitacijska_funkcija: LicitacijskaFunkcija,
+                 talon_izbiralka: IzbiralkaIzTalona,
+                 talon_menjalka: MenjalkaSTalonom
+                 ) -> None:
         """
         :param je_clovek: True ali False
         :param id_stevilka: id igralca
@@ -22,8 +28,11 @@ class Igralec:
         self.id = id_stevilka
         self.funkcija_poteze = funkcija_poteze
         self.licitacijska_funkcija = licitacijska_funkcija
+        self.talon_izbiralka = talon_izbiralka
+        self.talon_menjalka = talon_menjalka
         self.karte = set()  # type: Set[Karta]
-        self.pobrano = set()  # type: Set[Karta]
+        self.pobrano = []  # type: List[List[Karta]]
+        self.st_pobranih_stihov = 0
 
     def __eq__(self, other):
         return self.id == other.id
@@ -38,8 +47,10 @@ class Igralec:
             self.karte.add(karta)
 
     def poberi_stih(self, karte: Iterable[Karta]) -> None:
+        self.st_pobranih_stihov += 1
+        self.pobrano.append([])
         for karta in karte:
-            self.pobrano.add(karta)
+            self.pobrano[-1].append(karta)
 
     def licitiraj(self,
                   postavitev_igralcev: 'List[Igralec]',
@@ -81,3 +92,13 @@ class Igralec:
                 igralci[i].poberi_dodeljene_karte(paketek)
                 ind += kolko
         return talon
+
+    def izberi_iz_talona(self, deli_talona: List[List[Karta]]) -> List[Karta]:
+        return self.talon_izbiralka.izracunaj(self.karte, deli_talona)
+
+    def zamenjaj_s_talonom(self, del_talona: List[Karta]) -> None:
+        zalozeno = self.talon_menjalka.izracunaj(self.karte, del_talona)
+        self.pobrano.append([])
+        for karta in zalozeno:
+            self.pobrano[-1].append(karta)
+            self.karte.remove(karta)

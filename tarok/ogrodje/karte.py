@@ -2,7 +2,7 @@ from typing import Tuple, Set, Any
 from fractions import Fraction
 
 class Karta:
-    def __init__(self, barva: str, stevilcna_vrednost: int) -> None:
+    def __init__(self, barva: str, stevilcna_vrednost) -> None:
         assert (barva, stevilcna_vrednost) in karte_pomo
         self.barva = barva
         self.stevilcna_vrednost = stevilcna_vrednost
@@ -34,13 +34,17 @@ for i in range(len(BARVE)):
 BARVE.append(TAROK)
 karte_pomo |= {(BARVE[-1], i) for i in range(1, 23)}
 TOCKE = {}
+trula_vrednosti = [1, 21, 22]
 for karta in karte_pomo:
     if karta[1] in SLIKICE:
         vred = SLIKICE.index(karta[1]) + 2
-    elif karta[0] == TAROK and karta[1] in [1, 21, 22]:
+    elif karta[0] == TAROK and karta[1] in trula_vrednosti:
         vred = 5
     else:
         vred = 1
     TOCKE[karta] = vred
 
 KARTE = {Karta(barva, vred) for (barva, vred) in karte_pomo}  # type: Set[Karta]
+KRALJI = {Karta(barva, KRALJ) for barva in BARVE if barva != TAROK}
+TRULA = {Karta(TAROK, i) for i in trula_vrednosti}
+PALCKA = Karta(TAROK, 1)

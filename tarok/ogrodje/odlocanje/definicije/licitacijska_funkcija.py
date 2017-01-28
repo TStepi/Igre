@@ -15,7 +15,8 @@ class LicitacijskaFunkcija:
                   dosedanji_klici: List[Tuple[int, TipIgre]],
                   id_igralca: int,
                   karte_igralca: Set[Karta],
-                  dovoljene_igre: Set[TipIgre]) -> TipIgre:
+                  dovoljene_igre: Set[TipIgre],
+                  ) -> TipIgre:
         """
         Izracuna potezo.
         :param postavitev_igralcev: (ciklicni) seznam [igralec1_id, igralec2_id, ...], ki doloca vrstni red v igri
