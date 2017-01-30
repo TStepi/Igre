@@ -6,6 +6,7 @@ from ogrodje.karte import Karta
 from ogrodje.odlocanje.definicije.funkcija_poteze import FunkcijaPoteze
 from ogrodje.odlocanje.definicije.licitacijska_funkcija import LicitacijskaFunkcija
 from ogrodje.odlocanje.definicije.talonski_funkciji import IzbiralkaIzTalona, MenjalkaSTalonom
+from ogrodje.tarok import TALON_ID
 from ogrodje.tipi import TipIgre
 
 
@@ -26,6 +27,7 @@ class Igralec:
         """
         self.cloveski = je_clovek
         self.id = id_stevilka
+        assert self.id != TALON_ID
         self.funkcija_poteze = funkcija_poteze
         self.licitacijska_funkcija = licitacijska_funkcija
         self.talon_izbiralka = talon_izbiralka
@@ -64,10 +66,11 @@ class Igralec:
 
     def odigraj_potezo(self,
                        postavitev_igralcev: 'List[Igralec]',
-                       dosedanje_poteze: 'List[List[Tuple[Igralec, Karta]]]'
+                       dosedanje_poteze: 'List[List[Tuple[Igralec, Karta]]]',
+                       pobrano_iz_talona: List[Karta]
                        ) -> Karta:
         dovoljene = self.dopustne_karte([karta for (_, karta) in dosedanje_poteze[-1]])
-        izbrana = self.funkcija_poteze.izracunaj(postavitev_igralcev, dosedanje_poteze, self.id, self.karte, dovoljene)
+        izbrana = self.funkcija_poteze.izracunaj(postavitev_igralcev, dosedanje_poteze, pobrano_iz_talona, self.id, self.karte, dovoljene)
         self.karte.remove(izbrana)
         return izbrana
 
