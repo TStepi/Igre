@@ -73,6 +73,7 @@ class Tarok:
             zmagovalec_stiha.poberi_stih([karta for _, karta in poteze[-1]] + stipendija)
 
     def kdo_je_pobral(self, stih: List[Tuple[Igralec, Karta]]):
+
         return stih[0][0]
 
     def prestej_tocke(self) -> None:
