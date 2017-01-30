@@ -66,15 +66,19 @@ class Tarok:
             poteze.append([])
             for j in range(n):
                 igralec = self.igralci[(prvi + j) % n]
-                karta = igralec.odigraj_potezo(self.igralci, poteze, self.pobrano_iz_talona)
+                karta = igralec.odigraj_potezo(self.igralci, poteze, self.tip_igre, self.pobrano_iz_talona)
                 poteze[-1].append((igralec, karta))
             zmagovalec_stiha = self.kdo_je_pobral(poteze[-1])
             stipendija = self.talon[runda:runda + 1] if self.tip_igre == KLOP else []  # bo prazno po 6 rundah
             zmagovalec_stiha.poberi_stih([karta for _, karta in poteze[-1]] + stipendija)
 
     def kdo_je_pobral(self, stih: List[Tuple[Igralec, Karta]]):
-
-        return stih[0][0]
+        # TODO: podpora barvnega valata, ko bo treba ...
+        opti = 0
+        for i in range(1, len(stih)):
+            if stih[i][1] > stih[opti][1]:
+                opti = i
+        return stih[opti][0]
 
     def prestej_tocke(self) -> None:
         if self.aktivni_igralec.st_pobranih_stihov in [0, self.st_rund]:

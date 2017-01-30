@@ -2,12 +2,12 @@ from random import shuffle, random
 
 from typing import List, Set, Tuple, Iterable
 
-from ogrodje.karte import Karta
+from ogrodje.karte import Karta, TAROK, PALCKA
 from ogrodje.odlocanje.definicije.funkcija_poteze import FunkcijaPoteze
 from ogrodje.odlocanje.definicije.licitacijska_funkcija import LicitacijskaFunkcija
 from ogrodje.odlocanje.definicije.talonski_funkciji import IzbiralkaIzTalona, MenjalkaSTalonom
 from ogrodje.tarok import TALON_ID
-from ogrodje.tipi import TipIgre
+from ogrodje.tipi import TipIgre, BERAC, KLOP
 
 
 class Igralec:
@@ -61,15 +61,53 @@ class Igralec:
                   ) -> TipIgre:
         return self.licitacijska_funkcija.izracunaj(postavitev_igralcev, dosedanje_licitiranje, self.id, self.karte, dovoljene_igre)
 
-    def dopustne_karte(self, seznam_odvrzenih: List[Karta]) -> Set[Karta]:
-        raise Exception("hihi")
+    def dopustne_karte(self, delni_stih: List[Karta], igra: TipIgre) -> Set[Karta]:
+        if len(delni_stih) == 0:
+            return self.karte
+
+        barva_prve = delni_stih[0].barva
+
+        # TODO: poskrbi tu za pravila s trulo
+        # if dva od trule al neki:
+        #     vrni tretjega od trule
+
+        # osnovni filter
+        dovoljene = {karta for karta in self.karte if karta.barva == barva_prve}
+        if len(dovoljene) == 0:
+            # nimamo iste barve
+            if barva_prve == TAROK:
+                dovoljene = self.karte  # nimamo taroka --> karkoli
+            else:
+                dovoljene = {karta for karta in self.karte if karta.barva == TAROK}  # skrti smo barve
+                if len(dovoljene) == 0:  # zal tudi tarokov
+                    dovoljene = self.karte
+        # dopolnilna
+        if igra in [KLOP, BERAC]:
+            # ce je kaka dopustna (<--> vse dopustne) iste barve kot prva, dovolimo le visje ...
+            # sicer: lahko damo karkoli
+            for neka_nasa in dovoljene:
+                break  # tako najhitreje do neke karte
+            if neka_nasa.barva == barva_prve:
+                najvecja = delni_stih[0]
+                for karta in delni_stih[1:]:
+                    if karta.barva == barva_prve and karta > najvecja:
+                        najvecja = karta
+                dovoljene = {k for k in dovoljene if k > najvecja}
+            else:
+                pass
+            # palica mora biti izsiljena, a teh if-ov nau konc al kaj
+            if PALCKA in dovoljene:
+                if len(dovoljene) > 1:
+                    dovoljene.remove(PALCKA)
+        return dovoljene
 
     def odigraj_potezo(self,
                        postavitev_igralcev: 'List[Igralec]',
                        dosedanje_poteze: 'List[List[Tuple[Igralec, Karta]]]',
+                       igra: TipIgre,
                        pobrano_iz_talona: List[Karta]
                        ) -> Karta:
-        dovoljene = self.dopustne_karte([karta for (_, karta) in dosedanje_poteze[-1]])
+        dovoljene = self.dopustne_karte([karta for (_, karta) in dosedanje_poteze[-1]], igra)
         izbrana = self.funkcija_poteze.izracunaj(postavitev_igralcev, dosedanje_poteze, pobrano_iz_talona, self.id, self.karte, dovoljene)
         self.karte.remove(izbrana)
         return izbrana
