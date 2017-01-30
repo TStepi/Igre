@@ -1,11 +1,9 @@
+from typing import List, Tuple
+
 from ogrodje.bonus import BONUSI, BONUS_PAGAT_ULTIMO
 from ogrodje.igralec import Igralec
 from ogrodje.karte import KARTE, Karta
-
-from typing import List, Tuple, Dict
-
-from ogrodje.tipi import TipIgre, IGRE, KLOP, BERAC, ODPRTI_BERAC, SOLO_BREZ
-
+from ogrodje.tipi import IGRE, KLOP, BERAC, ODPRTI_BERAC, SOLO_BREZ
 
 VSE_TOCKE = 70
 TALON_ID = 0
@@ -73,7 +71,7 @@ class Tarok:
             zmagovalec_stiha.poberi_stih([karta for _, karta in poteze[-1]] + stipendija)
 
     def kdo_je_pobral(self, stih: List[Tuple[Igralec, Karta]]):
-        # TODO: podpora barvnega valata, ko bo treba ...
+        # TODO: podpora barvnega valata, ko bo treba  ...
         opti = 0
         for i in range(1, len(stih)):
             if stih[i][1] > stih[opti][1]:
