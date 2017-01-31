@@ -2,7 +2,7 @@ from typing import List, Tuple
 
 from ogrodje.bonus import BONUSI, BONUS_PAGAT_ULTIMO
 from ogrodje.igralec import Igralec
-from ogrodje.karte import KARTE, Karta
+from ogrodje.karte import KARTE, Karta, TRULA, PALCKA
 from ogrodje.tipi import IGRE, KLOP, BERAC, ODPRTI_BERAC, SOLO_BREZ, TipIgre
 
 VSE_TOCKE = 70
@@ -71,12 +71,21 @@ class Tarok:
             zmagovalec_stiha.poberi_stih([karta for _, karta in poteze[-1]] + stipendija)
 
     def kdo_je_pobral(self, stih: List[Tuple[Igralec, Karta]]):
-        # TODO: podpora barvnega valata, ko bo treba  ...
-        opti = 0
-        for i in range(1, len(stih)):
-            if stih[i][1] > stih[opti][1]:
+        # TODO: podpora barvnega valata, ko bo treba: tarok < barva (to pokrije tud trulo)
+
+        # edina izjema, ki se je spomnim, je, da je padla trula
+        videno_od_trule = 0
+        igralec_s_palcko = None
+        opti = None
+        for i in range(len(stih)):
+            karta = stih[i][1]
+            if karta in TRULA:
+                videno_od_trule += 1  # ok, ker so vse karte razlicne
+                if karta == PALCKA:
+                    igralec_s_palcko = i
+            if opti is None or karta > stih[opti][1]:
                 opti = i
-        return stih[opti][0]
+        return stih[igralec_s_palcko][0] if videno_od_trule == len(TRULA) else stih[opti][0]
 
     def prestej_tocke(self) -> None:
         if self.aktivni_igralec.st_pobranih_stihov in [0, self.st_rund]:

@@ -1,4 +1,4 @@
-from typing import Tuple, Set
+from typing import Tuple, Set, Iterable
 from fractions import Fraction
 
 
@@ -81,6 +81,14 @@ class Karta:
                or self.barva == TAROK and other.barva != TAROK
 
 
+def najvisja_karta(a: Iterable[Karta]):
+    najvisja = None
+    for k in a:
+        if najvisja is None or k > najvisja:
+            najvisja = k
+    return najvisja
+
+
 for i in range(len(BARVE)):
     obseg = range(7, 11) if i < 2 else range(1, 5)
     karte_pomo |= {(BARVE[i], platelc) for platelc in obseg}
@@ -100,6 +108,10 @@ for karta in karte_pomo:
 
 KARTE = {Karta(barva, vred) for (barva, vred) in karte_pomo}  # type: Set[Karta]
 KRALJI = {Karta(barva, KRALJ) for barva in BARVE if barva != TAROK}
-TRULA = {Karta(TAROK, i) for i in trula_vrednosti}
+
 PALCKA = Karta(TAROK, 1)
+MOND = Karta(TAROK, 21)
+SKIS = Karta(TAROK, 22)
+TRULA = {PALCKA, MOND, SKIS}
+
 

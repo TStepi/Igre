@@ -2,12 +2,12 @@ from random import shuffle, random
 
 from typing import List, Set, Tuple, Iterable
 
-from ogrodje.karte import Karta, TAROK, PALCKA
+from ogrodje.karte import Karta, TAROK, PALCKA, MOND, SKIS, najvisja_karta
 from ogrodje.odlocanje.definicije.funkcija_poteze import FunkcijaPoteze
 from ogrodje.odlocanje.definicije.licitacijska_funkcija import LicitacijskaFunkcija
 from ogrodje.odlocanje.definicije.talonski_funkciji import IzbiralkaIzTalona, MenjalkaSTalonom
 from ogrodje.tarok import TALON_ID
-from ogrodje.tipi import TipIgre, BERAC, KLOP
+from ogrodje.tipi import TipIgre, BERAC, ODPRTI_BERAC, KLOP
 
 
 class Igralec:
@@ -62,43 +62,47 @@ class Igralec:
         return self.licitacijska_funkcija.izracunaj(postavitev_igralcev, dosedanje_licitiranje, self.id, self.karte, dovoljene_igre)
 
     def dopustne_karte(self, delni_stih: List[Karta], igra: TipIgre) -> Set[Karta]:
+        """
+        Implementira pravila metanja kart na strani https://www.pagat.com/tarot/sltarok.html#play
+        :param delni_stih:
+        :param igra:
+        :return:
+        """
+        # TODO: barvni valat
+
         if len(delni_stih) == 0:
             return self.karte
 
         barva_prve = delni_stih[0].barva
 
-        # TODO: poskrbi tu za pravila s trulo
-        # if dva od trule al neki:
-        #     vrni tretjega od trule
-
         # osnovni filter
-        dovoljene = {karta for karta in self.karte if karta.barva == barva_prve}
+        dovoljene = {karta for karta in self.karte if karta.barva == barva_prve}  # domo isto, ce jo mamo
         if len(dovoljene) == 0:
-            # nimamo iste barve
-            if barva_prve == TAROK:
-                dovoljene = self.karte  # nimamo taroka --> karkoli
-            else:
-                dovoljene = {karta for karta in self.karte if karta.barva == TAROK}  # skrti smo barve
-                if len(dovoljene) == 0:  # zal tudi tarokov
+            if barva_prve == TAROK:  # ne mormo se odzvat s tarokom
+                dovoljene = self.karte
+            else:                    # ne mormo se odzvat z barvo
+                dovoljene = {karta for karta in self.karte if karta.barva == TAROK}
+                if len(dovoljene) == 0:  # nimamo niti tarokov
                     dovoljene = self.karte
-        # dopolnilna
-        if igra in [KLOP, BERAC]:
+        # posebne igre
+        if igra in [KLOP, BERAC, ODPRTI_BERAC]:
             # ce je kaka dopustna (<--> vse dopustne) iste barve kot prva, dovolimo le visje ...
             # sicer: lahko damo karkoli
-            for neka_nasa in dovoljene:
-                break  # tako najhitreje do neke karte
-            if neka_nasa.barva == barva_prve:
-                najvecja = delni_stih[0]
-                for karta in delni_stih[1:]:
-                    if karta.barva == barva_prve and karta > najvecja:
-                        najvecja = karta
-                dovoljene = {k for k in dovoljene if k > najvecja}
-            else:
-                pass
-            # palica mora biti izsiljena, a teh if-ov nau konc al kaj
-            if PALCKA in dovoljene:
-                if len(dovoljene) > 1:
-                    dovoljene.remove(PALCKA)
+
+            # treba cez vse, ce se da
+            max_stih = najvisja_karta(delni_stih)
+            max_jaz = najvisja_karta(dovoljene)
+            if max_jaz > max_stih:
+                dovoljene = {karta for karta in dovoljene if karta > max_stih}
+
+            # palica mora biti izsiljena, zato jo najprej vrzemo ven
+            if PALCKA in dovoljene and len(dovoljene) > 1:
+                dovoljene.remove(PALCKA)
+            # in dodamo nazaj, ce
+            # 1) je zadnja karta/(tarok in lahko igras taroke): za to poskrbljeno z 'and len(dovoljene) > 1'
+            # 2) edina pobere stih
+            if PALCKA in self.karte and SKIS in delni_stih and MOND in delni_stih:
+                dovoljene.add(PALCKA)
         return dovoljene
 
     def odigraj_potezo(self,
