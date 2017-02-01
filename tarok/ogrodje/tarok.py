@@ -6,7 +6,6 @@ from ogrodje.karte import KARTE, Karta, TRULA, PALCKA
 from ogrodje.tipi import IGRE, KLOP, BERAC, ODPRTI_BERAC, SOLO_BREZ, TipIgre
 
 VSE_TOCKE = 70
-TALON_ID = 0
 
 
 class Tarok:

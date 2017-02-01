@@ -1,23 +1,21 @@
 from random import shuffle, random
 
-from typing import List, Set, Tuple, Iterable
-
+from typing import List, Set, Tuple, Iterable, Callable
 from ogrodje.karte import Karta, TAROK, PALCKA, MOND, SKIS, najvisja_karta
-from ogrodje.odlocanje.definicije.funkcija_poteze import FunkcijaPoteze
-from ogrodje.odlocanje.definicije.licitacijska_funkcija import LicitacijskaFunkcija
-from ogrodje.odlocanje.definicije.talonski_funkciji import IzbiralkaIzTalona, MenjalkaSTalonom
-from ogrodje.tarok import TALON_ID
 from ogrodje.tipi import TipIgre, BERAC, ODPRTI_BERAC, KLOP
+
+
+TALON_ID = 0
 
 
 class Igralec:
     def __init__(self,
                  je_clovek: bool,
                  id_stevilka: int,
-                 funkcija_poteze: FunkcijaPoteze,
-                 licitacijska_funkcija: LicitacijskaFunkcija,
-                 talon_izbiralka: IzbiralkaIzTalona,
-                 talon_menjalka: MenjalkaSTalonom
+                 funkcija_poteze: 'Callable[[List[Igralec], List[List[Tuple[Igralec, Karta]]], List[Karta], int, Set[Karta], Set[Karta]], Karta]',
+                 licitacijska_funkcija: 'Callable[[List[Igralec], List[Tuple[int, TipIgre]], int, Set[Karta], Set[TipIgre]], TipIgre]',
+                 talon_izbiralka: Callable[[Set[Karta], List[List[Karta]]], List[Karta]],
+                 talon_menjalka: Callable[[Set[Karta], List[Karta]], Set[Karta]]
                  ) -> None:
         """
         :param je_clovek: True ali False
@@ -59,7 +57,14 @@ class Igralec:
                   dosedanje_licitiranje: List[Tuple[int, TipIgre]],
                   dovoljene_igre: Set[TipIgre]
                   ) -> TipIgre:
-        return self.licitacijska_funkcija.izracunaj(postavitev_igralcev, dosedanje_licitiranje, self.id, self.karte, dovoljene_igre)
+        """
+        Izracuna potezo.
+        :param postavitev_igralcev: (ciklicni) seznam [igralec1_id, igralec2_id, ...], ki doloca vrstni red v igri
+        :param dosedanje_licitiranje: seznam klicev do tega trenutka, kot so si sledili pri licitaciji
+        :param dovoljene_igre: dopustni klici
+        :return:
+        """
+        return self.licitacijska_funkcija(postavitev_igralcev, dosedanje_licitiranje, self.id, self.karte, dovoljene_igre)
 
     def dopustne_karte(self, delni_stih: List[Karta], igra: TipIgre) -> Set[Karta]:
         """
@@ -111,8 +116,18 @@ class Igralec:
                        igra: TipIgre,
                        pobrano_iz_talona: List[Karta]
                        ) -> Karta:
+        """
+        Izracuna potezo.
+        :param postavitev_igralcev: (ciklicni) seznam [igralec1_id, igralec2_id, ...], ki doloca vrstni red v igri
+        :param dosedanje_poteze: seznam potez, vsaka poteza je casovno urejen (kot je potekala poteza) seznam parov
+        (igralecID, Karta). Zadnja element predstavlja ze vrzene karte v dani potezi in je zato lahko krajsi kot tisti
+        pred njim.
+        :param igra:
+        :param pobrano_iz_talona: karte, ki jih je aktivni igralec vzel iz talona
+        :return: izbrana Karta
+        """
         dovoljene = self.dopustne_karte([karta for (_, karta) in dosedanje_poteze[-1]], igra)
-        izbrana = self.funkcija_poteze.izracunaj(postavitev_igralcev, dosedanje_poteze, pobrano_iz_talona, self.id, self.karte, dovoljene)
+        izbrana = self.funkcija_poteze(postavitev_igralcev, dosedanje_poteze, pobrano_iz_talona, self.id, self.karte, dovoljene)
         self.karte.remove(izbrana)
         return izbrana
 
@@ -139,10 +154,10 @@ class Igralec:
         return talon
 
     def izberi_iz_talona(self, deli_talona: List[List[Karta]]) -> List[Karta]:
-        return self.talon_izbiralka.izracunaj(self.karte, deli_talona)
+        return self.talon_izbiralka(self.karte, deli_talona)
 
     def zamenjaj_s_talonom(self, del_talona: List[Karta]) -> None:
-        zalozeno = self.talon_menjalka.izracunaj(self.karte, del_talona)
+        zalozeno = self.talon_menjalka(self.karte, del_talona)
         self.pobrano.append([])
         for karta in zalozeno:
             self.pobrano[-1].append(karta)
