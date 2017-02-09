@@ -76,35 +76,31 @@ class Igralec:
         # TODO: barvni valat
 
         if len(delni_stih) == 0:
-            return self.karte
-
-        barva_prve = delni_stih[0].barva
-
-        # osnovni filter
-        dovoljene = {karta for karta in self.karte if karta.barva == barva_prve}  # domo isto, ce jo mamo
-        if len(dovoljene) == 0:
-            if barva_prve == TAROK:  # ne mormo se odzvat s tarokom
-                dovoljene = self.karte
-            else:                    # ne mormo se odzvat z barvo
-                dovoljene = {karta for karta in self.karte if karta.barva == TAROK}
-                if len(dovoljene) == 0:  # nimamo niti tarokov
-                    dovoljene = self.karte
+            dovoljene = {karta for karta in self.karte}  # ne smemo samo = self.karte, da namo kake palce zgubl:)
+        else:
+            barva_prve = delni_stih[0].barva
+            # osnovni filter
+            dovoljene = {karta for karta in self.karte if karta.barva == barva_prve}  # domo isto, ce jo mamo
+            if len(dovoljene) == 0:
+                if barva_prve == TAROK:  # ne mormo se odzvat s tarokom
+                    dovoljene = {karta for karta in self.karte}
+                else:                    # ne mormo se odzvat z barvo
+                    dovoljene = {karta for karta in self.karte if karta.barva == TAROK}
+                    if len(dovoljene) == 0:  # nimamo niti tarokov
+                        dovoljene = {karta for karta in self.karte}
         # posebne igre
         if igra in [KLOP, BERAC, ODPRTI_BERAC]:
-            # ce je kaka dopustna (<--> vse dopustne) iste barve kot prva, dovolimo le visje ...
-            # sicer: lahko damo karkoli
-
             # treba cez vse, ce se da
             max_stih = najvisja_karta(delni_stih)
             max_jaz = najvisja_karta(dovoljene)
-            if max_jaz > max_stih:
+            if max_stih is not None and max_jaz > max_stih:
                 dovoljene = {karta for karta in dovoljene if karta > max_stih}
 
             # palica mora biti izsiljena, zato jo najprej vrzemo ven
             if PALCKA in dovoljene and len(dovoljene) > 1:
                 dovoljene.remove(PALCKA)
             # in dodamo nazaj, ce
-            # 1) je zadnja karta/(tarok in lahko igras taroke): za to poskrbljeno z 'and len(dovoljene) > 1'
+            # 1) je palica zadnja karta ali (tarok in lahko igras taroke): za to poskrbljeno z 'and len(dovoljene) > 1'
             # 2) edina pobere stih
             if PALCKA in self.karte and SKIS in delni_stih and MOND in delni_stih:
                 dovoljene.add(PALCKA)
